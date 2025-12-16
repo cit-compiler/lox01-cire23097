@@ -1,14 +1,18 @@
-package codes.com.craftinginterpreters.lox;
+package com.craftinginterpreters.lox;
 
 import java.util.List;
 
-public class Parser {
+import static com.craftinginterpreters.lox.TokenType.*;
+
+class Parser {
   private final List<Token> tokens;
   private int current = 0;
 
   Parser(List<Token> tokens) {
     this.tokens = tokens;
   }
+}
+
     private Expr expression() {
     return equality();
   }
@@ -101,4 +105,3 @@ public class Parser {
       return new Expr.Grouping(expr);
     }
   }
-}
