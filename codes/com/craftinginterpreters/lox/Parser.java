@@ -5,15 +5,16 @@ import java.util.List;
 import static com.craftinginterpreters.lox.TokenType.*;
 
 class Parser {
-  private static class ParseError extends RuntimeException{} 
+  private static class ParseError extends RuntimeException {}
+
   private final List<Token> tokens;
   private int current = 0;
 
   Parser(List<Token> tokens) {
     this.tokens = tokens;
   }
-}  
-Expr parse() {
+
+  Expr parse() {
     try {
       return expression();
     } catch (ParseError error) {
@@ -21,21 +22,23 @@ Expr parse() {
     }
   }
 
-    private Expr expression() {
+  private Expr expression() {
     return equality();
   }
-    private Expr equality() {
-      Expr expr = comparison();
 
-      while (match(BANG_EQUAL, EQUAL_EQUAL)) {
-         Token operator = previous();
-         Expr right = comparison();
-         expr = new Expr.Binary(expr, operator, right);
-        }
+  private Expr equality() {
+    Expr expr = comparison();
 
-        return expr;
+    while (match(BANG_EQUAL, EQUAL_EQUAL)) {
+      Token operator = previous();
+      Expr right = comparison();
+      expr = new Expr.Binary(expr, operator, right);
     }
-    private boolean match(TokenType... types) {
+
+    return expr;
+  }
+
+  private boolean match(TokenType... types) {
     for (TokenType type : types) {
       if (check(type)) {
         advance();
@@ -45,15 +48,18 @@ Expr parse() {
 
     return false;
   }
-    private boolean check(TokenType type) {
+
+  private boolean check(TokenType type) {
     if (isAtEnd()) return false;
     return peek().type == type;
   }
-    private Token advance() {
-      if (!isAtEnd()) current++;
-      return previous();
-    } 
-      private boolean isAtEnd() {
+
+  private Token advance() {
+    if (!isAtEnd()) current++;
+    return previous();
+  }
+
+  private boolean isAtEnd() {
     return peek().type == EOF;
   }
 
@@ -65,8 +71,7 @@ Expr parse() {
     return tokens.get(current - 1);
   }
 
-  
-    private Expr comparison() {
+  private Expr comparison() {
     Expr expr = term();
 
     while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
@@ -77,7 +82,8 @@ Expr parse() {
 
     return expr;
   }
-   private Expr term() {
+
+  private Expr term() {
     Expr expr = factor();
 
     while (match(MINUS, PLUS)) {
@@ -88,7 +94,8 @@ Expr parse() {
 
     return expr;
   }
-    private Expr factor() {
+
+  private Expr factor() {
     Expr expr = unary();
 
     while (match(SLASH, STAR)) {
@@ -99,7 +106,8 @@ Expr parse() {
 
     return expr;
   }
-    private Expr unary() {
+
+  private Expr unary() {
     if (match(BANG, MINUS)) {
       Token operator = previous();
       Expr right = unary();
@@ -108,7 +116,8 @@ Expr parse() {
 
     return primary();
   }
-    private Expr primary() {
+
+  private Expr primary() {
     if (match(FALSE)) return new Expr.Literal(false);
     if (match(TRUE)) return new Expr.Literal(true);
     if (match(NIL)) return new Expr.Literal(null);
@@ -122,17 +131,21 @@ Expr parse() {
       consume(RIGHT_PAREN, "Expect ')' after expression.");
       return new Expr.Grouping(expr);
     }
-      throw error(peek(), "Expect expression.");
-    }
-      private Token consume(TokenType type, String message) {
+
+    throw error(peek(), "Expect expression.");
+  }
+
+  private Token consume(TokenType type, String message) {
     if (check(type)) return advance();
 
     throw error(peek(), message);
   }
-    private ParseError error(Token token, String message) {
+
+  private ParseError error(Token token, String message) {
     Lox.error(token, message);
     return new ParseError();
   }
+
   private void synchronize() {
     advance();
 
@@ -154,4 +167,6 @@ Expr parse() {
       advance();
     }
   }
-   
+
+
+}
