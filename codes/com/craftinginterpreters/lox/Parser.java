@@ -12,7 +12,14 @@ class Parser {
   Parser(List<Token> tokens) {
     this.tokens = tokens;
   }
-}
+}  
+Expr parse() {
+    try {
+      return expression();
+    } catch (ParseError error) {
+      return null;
+    }
+  }
 
     private Expr expression() {
     return equality();
@@ -46,9 +53,19 @@ class Parser {
       if (!isAtEnd()) current++;
       return previous();
     } 
-    private Token previous() {
+      private boolean isAtEnd() {
+    return peek().type == EOF;
+  }
+
+  private Token peek() {
+    return tokens.get(current);
+  }
+
+  private Token previous() {
     return tokens.get(current - 1);
   }
+
+  
     private Expr comparison() {
     Expr expr = term();
 
@@ -105,10 +122,36 @@ class Parser {
       consume(RIGHT_PAREN, "Expect ')' after expression.");
       return new Expr.Grouping(expr);
     }
+      throw error(peek(), "Expect expression.");
+    }
       private Token consume(TokenType type, String message) {
     if (check(type)) return advance();
 
     throw error(peek(), message);
   }
-   
+    private ParseError error(Token token, String message) {
+    Lox.error(token, message);
+    return new ParseError();
   }
+  private void synchronize() {
+    advance();
+
+    while (!isAtEnd()) {
+      if (previous().type == SEMICOLON) return;
+
+      switch (peek().type) {
+        case CLASS:
+        case FUN:
+        case VAR:
+        case FOR:
+        case IF:
+        case WHILE:
+        case PRINT:
+        case RETURN:
+          return;
+      }
+
+      advance();
+    }
+  }
+   
